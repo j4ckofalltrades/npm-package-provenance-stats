@@ -1,13 +1,14 @@
 # npm package provenance stats
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey.svg)](https://opensource.org/licenses/MIT)
+![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey.svg)
+[![Update Attestations Data](https://github.com/j4ckofalltrades/npm-package-provenance-stats/actions/workflows/update-attestations.yml/badge.svg)](https://github.com/j4ckofalltrades/npm-package-provenance-stats/actions/workflows/update-attestations.yml)
+[![Deploy static content to Pages](https://github.com/j4ckofalltrades/npm-package-provenance-stats/actions/workflows/deploy.yml/badge.svg)](https://github.com/j4ckofalltrades/npm-package-provenance-stats/actions/workflows/deploy.yml)
 
 This site shows which of the top 500 most-downloaded packages (by monthly download count) on [npm](https://npmjs.com) have been uploaded with attestations; data is updated daily.
 
 The list of most-downloaded packages are extracted from the [download-counts](https://npmjs.com/package/download-counts) package.
 
 The attestation details for the latest version of each package is fetched from `registry.npmjs.org/<package>/latest` endpoint.
-
 If a package was uploaded with attestations, the attestations url is set in the `dist.attestations.url` field.
 
 See below for an abridged response payload example for the `vite` package.
@@ -45,5 +46,11 @@ See below for an abridged response payload example for the `vite` package.
   }
 }
 ```
+
+## Resources
+
+Refer to the npm docs for more details about [Trusted Publishing](https://docs.npmjs.com/trusted-publishers) and [generating provenance attestations](https://docs.npmjs.com/generating-provenance-statements).
+
+## Attribution
 
 Inspired by [Are we PEP 740 yet?](https://trailofbits.github.io/are-we-pep740-yet/).
