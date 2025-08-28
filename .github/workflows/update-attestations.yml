@@ -35,10 +35,10 @@ jobs:
       run: |
         git config --local user.name "Attestation Update Bot"
         git config --local user.email "j4ckofalltrades@users.noreply.github.com"
-        git add attestations.json
-        if git diff --cached --quiet; then
+        if git diff --quiet; then
           echo "No changes to commit"
         else
+          git add .
           git commit -m "Update attestations data $(date '+%Y-%m-%d')"
           git push
         fi
