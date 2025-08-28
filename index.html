@@ -96,7 +96,7 @@
         }
 
         .package-list {
-            max-height: 1000px;
+            height: 550px;
             overflow-y: auto;
         }
 
@@ -151,6 +151,12 @@
             color: #6c757d;
         }
 
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 16px;
+        }
+
         @media (max-width: 768px) {
             .container {
                 grid-template-columns: 1fr;
@@ -177,14 +183,8 @@
             <div class="section">
                 <h2>About</h2>
                 <p>This site shows the top 500 most-downloaded packages on <a href="https://npmjs.com" target="_blank" >npm</a> showing which have been uploaded with attestations.</p>
-                <span>Packages marked in green have attestations for their latest version.</span>
-            </div>
-
-            <div class="section">
-                <h2>Generating provenance statements</h2>
-                <p>npm supports generating provenance statements for the packages you publish.</p>
-                <p>This allows you to publicly establish where a package was built and who published a package, which can increase supply-chain security for your packages.</p>
-                <p>Refer to the <a href="https://docs.npmjs.com/generating-provenance-statements" target="_blank">npm Docs</a> for more details.</p>
+                <p>Packages marked in green have attestations for their latest version.</p>
+                <p>Refer to the npm docs for <a href="https://docs.npmjs.com/generating-provenance-statements" target="_blank">generating provenance statements</a>.</p>
             </div>
         </div>
 
@@ -199,6 +199,10 @@
         </div>
     </div>
 
+    <footer class="footer">
+        <div id="lastUpdated">Loading...</div>
+    </footer>
+
     <script>
         let packagesData = [];
         let filteredPackages = [];
@@ -206,7 +210,23 @@
         async function loadData() {
             try {
                 const response = await fetch('data/attestations.json');
-                packagesData = await response.json();
+                const data = await response.json();
+                
+                packagesData = data.packages;
+                const lastUpdated = new Date(data.lastUpdated).toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false,
+                    timeZone: 'UTC',
+                    timeZoneName: 'short'
+                });
+                document.getElementById('lastUpdated').textContent = `Last updated ${lastUpdated}. (Updated daily.)`;
+                
                 filteredPackages = [...packagesData];
 
                 const withAttestations = packagesData.filter(pkg => pkg.attestations_url !== "").length;
@@ -216,6 +236,7 @@
                 renderPackages();
             } catch (error) {
                 document.getElementById('packageList').innerHTML = '<div class="loading">Error loading data</div>';
+                document.getElementById('lastUpdated').textContent = 'Error loading timestamp';
                 console.error('Error loading data:', error);
             }
         }
