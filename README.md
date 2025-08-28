@@ -2,7 +2,6 @@
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey.svg)
 [![Update Attestations Data](https://github.com/j4ckofalltrades/npm-package-provenance-stats/actions/workflows/update-attestations.yml/badge.svg)](https://github.com/j4ckofalltrades/npm-package-provenance-stats/actions/workflows/update-attestations.yml)
-[![Deploy static content to Pages](https://github.com/j4ckofalltrades/npm-package-provenance-stats/actions/workflows/deploy.yml/badge.svg)](https://github.com/j4ckofalltrades/npm-package-provenance-stats/actions/workflows/deploy.yml)
 
 This site shows which of the top 500 most-downloaded packages (by monthly download count) on [npm](https://npmjs.com) have been uploaded with attestations; data is updated daily.
 
