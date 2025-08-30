@@ -5,6 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>npm package provenance stats</title>
     <style>
+        :root {
+            /* Light theme colors */
+            --bg-primary: #f8f9fa;
+            --bg-secondary: white;
+            --text-primary: #333;
+            --text-secondary: #6c757d;
+            --text-link: #0366d6;
+            --border-color: #e2e8f0;
+            --shadow-color: rgba(0,0,0,0.1);
+            
+            /* Package state colors */
+            --package-attestations-bg: #d4edda;
+            --package-attestations-hover: #c3e6cb;
+            --package-without-attestations-bg: #fff3cd;
+            --package-without-attestations-hover: #ffeaa7;
+            --package-unsupported-bg: #f8d7da;
+            --package-unsupported-hover: #f5c6cb;
+            --package-outdated-bg: #e9ecef;
+            --package-outdated-hover: #dee2e6;
+            
+            /* Legend text colors */
+            --color-green: #0f7b0f;
+            --color-grey: #495057;
+            --color-yellow: #cc8800;
+            --color-pink: #cc0000;
+        }
+
+        [data-theme="dark"] {
+            /* Dark theme colors */
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d3748;
+            --text-primary: #e9ecef;
+            --text-secondary: #a0aec0;
+            --text-link: #4dabf7;
+            --border-color: #4a5568;
+            --shadow-color: rgba(0,0,0,0.3);
+            
+            /* Package state colors for dark theme */
+            --package-attestations-bg: #2d5a2d;
+            --package-attestations-hover: #3d6a3d;
+            --package-without-attestations-bg: #5c4a1a;
+            --package-without-attestations-hover: #6c5a2a;
+            --package-unsupported-bg: #5c2d2d;
+            --package-unsupported-hover: #6c3d3d;
+            --package-outdated-bg: #3a3a3a;
+            --package-outdated-hover: #4a4a4a;
+            
+            /* Legend text colors for dark theme */
+            --color-green: #4ade80;
+            --color-grey: #9ca3af;
+            --color-yellow: #fbbf24;
+            --color-pink: #f87171;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -14,8 +68,9 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
-            color: #333;
-            background-color: #f8f9fa;
+            color: var(--text-primary);
+            background-color: var(--bg-primary);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .container {
@@ -25,38 +80,127 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 40px;
+            position: relative;
         }
 
         .header {
             grid-column: 1 / -1;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             margin-bottom: 20px;
         }
 
-        .source-link {
-            color: #0366d6;
-            text-decoration: none;
-            font-weight: 500;
+        .header h1 {
+            margin: 0;
         }
 
-        .source-link:hover {
+        .header-controls {
+            position: absolute;
+            top: 0;
+            right: 20px;
+            display: flex;
+            z-index: 1000;
+        }
+
+        .theme-toggle {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .theme-toggle-input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .theme-toggle-slider {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 60px;
+            height: 32px;
+            background: #e9ecef;
+            border-radius: 16px;
+            padding: 3px;
+            transition: background-color 0.3s ease;
+            position: relative;
+        }
+
+        .theme-toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: white;
+            transition: transform 0.3s ease;
+            transform: translateX(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .theme-toggle-input:checked + .theme-toggle-slider::before {
+            transform: translateX(28px);
+        }
+
+        .theme-toggle-input:checked + .theme-toggle-slider {
+            background: #495057;
+        }
+
+        .theme-toggle-input:checked + .theme-toggle-slider::before {
+            background: gray;
+        }
+
+        .theme-toggle-icon {
+            font-size: 20px;
+            z-index: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .theme-toggle-light {
+            opacity: 1;
+        }
+
+        .theme-toggle-dark {
+            opacity: 0.5;
+        }
+
+        .theme-toggle-input:checked + .theme-toggle-slider .theme-toggle-light {
+            opacity: 0.5;
+        }
+
+        .theme-toggle-input:checked + .theme-toggle-slider .theme-toggle-dark {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 10px;
+            }
+
+            .stats {
+                font-size: 4em;
+            }
+        }
+
+        /* Ensure all links maintain consistent color */
+        a, a:visited, a:link {
+            color: var(--text-link);
+        }
+
+        a:hover {
             text-decoration: underline;
         }
 
         .left-column {
-            padding: 30px;
-            border-radius: 8px;
             height: fit-content;
         }
 
         .stats {
-            font-size: 6em;
+            font-size: 5em;
             font-weight: bold;
             text-align: center;
-            margin-bottom: 30px;
-            color: #2d3748;
+            margin-bottom: 10px;
+            color: var(--text-primary);
         }
 
         .section {
@@ -66,7 +210,7 @@
         .section h2 {
             font-size: 1.5em;
             margin-bottom: 15px;
-            color: #2d3748;
+            color: var(--text-primary);
         }
 
         .section p {
@@ -74,25 +218,57 @@
             line-height: 1.7;
         }
 
+        .section ul {
+            margin-bottom: 15px;
+            padding-left: 20px;
+            line-height: 1.7;
+        }
+
+        .section ul li {
+            margin-bottom: 5px;
+        }
+
+        .color-green {
+            color: var(--color-green);
+            font-weight: 500;
+        }
+
+        .color-grey {
+            color: var(--color-grey);
+            font-weight: 500;
+        }
+
+        .color-yellow {
+            color: var(--color-yellow);
+            font-weight: 500;
+        }
+
+        .color-pink {
+            color: var(--color-pink);
+            font-weight: 500;
+        }
+
         .right-column {
-            background: white;
+            background: var(--bg-secondary);
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px var(--shadow-color);
         }
 
         .search-box {
             width: 100%;
             padding: 12px 16px;
-            border: 2px solid #e2e8f0;
+            border: 2px solid var(--border-color);
             border-radius: 6px;
             font-size: 16px;
             margin-bottom: 20px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
         }
 
         .search-box:focus {
             outline: none;
-            border-color: #4299e1;
+            border-color: var(--text-link);
         }
 
         .package-list {
@@ -101,7 +277,7 @@
         }
 
         .package-item {
-            padding: 12px 16px;
+            padding: 12px 16px 12px 40px;
             margin-bottom: 8px;
             border-radius: 6px;
             display: flex;
@@ -109,6 +285,11 @@
             align-items: center;
             text-decoration: none;
             color: inherit;
+            position: relative;
+        }
+
+        .package-item:hover {
+            text-decoration: none;
         }
 
         .package-item:hover {
@@ -116,11 +297,7 @@
         }
 
         .package-with-attestations:hover {
-            background-color: #c3e6cb;
-        }
-
-        .package-without-attestations:hover {
-            background-color: #e2e3e5;
+            background-color: var(--package-attestations-hover);
         }
 
         .package-item[title] {
@@ -128,11 +305,31 @@
         }
 
         .package-with-attestations {
-            background-color: #d4edda;
+            background-color: var(--package-attestations-bg);
         }
 
         .package-without-attestations {
-            background-color: #f8f9fa;
+            background-color: var(--package-without-attestations-bg);
+        }
+
+        .package-without-attestations:hover {
+            background-color: var(--package-without-attestations-hover);
+        }
+
+        .package-item.unsupported-publisher {
+            background-color: var(--package-unsupported-bg);
+        }
+
+        .package-item.unsupported-publisher:hover {
+            background-color: var(--package-unsupported-hover);
+        }
+
+        .package-item.outdated {
+            background-color: var(--package-outdated-bg);
+        }
+
+        .package-item.outdated:hover {
+            background-color: var(--package-outdated-hover);
         }
 
         .package-name {
@@ -142,13 +339,45 @@
 
         .package-version {
             font-size: 14px;
-            color: #6c757d;
+            color: var(--text-secondary);
+        }
+
+        .package-item::before {
+            content: '';
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .package-item.unsupported-publisher::before {
+            content: '🚫';
+        }
+
+        .package-item.outdated::before {
+            content: '⏰';
+        }
+
+        .package-without-attestations::before {
+            content: '➖';
+        }
+
+        .package-with-attestations::before {
+            content: '🔏';
         }
 
         .loading {
             text-align: center;
             padding: 40px;
-            color: #6c757d;
+            color: var(--text-secondary);
         }
 
         .footer {
@@ -157,34 +386,40 @@
             font-size: 16px;
         }
 
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-                gap: 20px;
-                padding: 10px;
-            }
-            
-            .stats {
-                font-size: 4em;
-            }
+        .footer-content p {
+            margin-bottom: 10px;
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
+<div class="container">
         <div class="header">
             <h1>npm package provenance stats</h1>
-            <a href="https://github.com/j4ckofalltrades/npm-package-provenance-stats" target="_blank" class="source-link">Source</a>
+            <div class="header-controls">
+                <label class="theme-toggle" for="theme-toggle" aria-label="Toggle dark mode">
+                    <input type="checkbox" id="theme-toggle" class="theme-toggle-input">
+                    <span class="theme-toggle-slider">
+                        <span class="theme-toggle-icon theme-toggle-light">🌞</span>
+                        <span class="theme-toggle-icon theme-toggle-dark">🌙</span>
+                    </span>
+                </label>
+            </div>
         </div>
 
         <div class="left-column">
             <div class="stats" id="stats">Loading...</div>
             
             <div class="section">
-                <h2>About</h2>
+                <h2>What is this list?</h2>
                 <p>This site shows the top 500 most-downloaded packages on <a href="https://npmjs.com" target="_blank" >npm</a> showing which have been uploaded with attestations.</p>
-                <p>Packages marked in green have attestations for their latest version.</p>
-                <p>Refer to the npm docs for <a href="https://docs.npmjs.com/generating-provenance-statements" target="_blank">generating provenance statements</a>.</p>
+                <ul>
+                    <li>Green packages with a 🔏 have attestations for their latest release</li>
+                    <li>Gray packages with a ⏰ comes from a supported CI/CD provider but were uploaded before attestations were available</li>
+                    <li>Yellow packages with a ➖ come from a supported CI/CD provider but have no attestations (yet!)</li>
+                    <li>Magenta packages with a 🚫 come from an unsupported CI/CD provider</li>
+                </ul>
+                <p>Refer to the npm docs for more details about <a href="https://docs.npmjs.com/trusted-publishers" target="_blank">Trusted Publishers</a> and <a href="https://docs.npmjs.com/generating-provenance-statements" target="_blank">generating provenance statements</a>.</p>
             </div>
         </div>
 
@@ -207,6 +442,45 @@
         let packagesData = [];
         let filteredPackages = [];
 
+        // https://docs.npmjs.com/generating-provenance-statements
+        const supportedPublishers = [
+            'github.com',
+            'gitlab.com',
+        ];
+
+        // https://github.blog/security/supply-chain-security/introducing-npm-package-provenance/
+        const attestationsEnabledDate = new Date('2023-04-19');
+
+        function isSupportedPublisher(repositoryUrl) {
+            if (!repositoryUrl) return false;
+            return supportedPublishers.some(publisher => repositoryUrl.toLowerCase().includes(publisher.toLowerCase()));
+        }
+
+        function isOutdated(lastUploadedDate) {
+            if (!lastUploadedDate) return false;
+            const uploadDate = new Date(lastUploadedDate);
+            return uploadDate < attestationsEnabledDate;
+        }
+
+        function getPackageStateClasses(pkg) {
+            const classes = [];
+            const hasAttestations = pkg.attestationsUrl !== "";
+            
+            if (hasAttestations) {
+                classes.push('package-with-attestations');
+            } else {
+                classes.push('package-without-attestations');
+                
+                if (!isSupportedPublisher(pkg.repositoryUrl)) {
+                    classes.push('unsupported-publisher');
+                } else if (isOutdated(pkg.lastUploaded)) {
+                    classes.push('outdated');
+                }
+            }
+            
+            return classes.join(' ');
+        }
+
         async function loadData() {
             try {
                 const response = await fetch('data/attestations.json');
@@ -225,13 +499,46 @@
                     timeZone: 'UTC',
                     timeZoneName: 'short'
                 });
-                document.getElementById('lastUpdated').textContent = `Last updated ${lastUpdated}. (Updated daily.)`;
+                document.getElementById('lastUpdated').innerHTML =
+                    `<div class="footer-content">
+                        <p>Last updated ${lastUpdated}. (Updated daily.)</p>
+                        <p>Inspired by <a href="https://trailofbits.github.io/are-we-pep740-yet" target="_blank">Are we PEP 740 yet?</a>. Source on <a href="https://github.com/j4ckofalltrades/npm-package-provenance-stats" target="_blank">GitHub</a>.</p>
+                     </div>
+                     `;
                 
                 filteredPackages = [...packagesData];
 
-                const withAttestations = packagesData.filter(pkg => pkg.attestations_url !== "").length;
+                // Calculate statistics
                 const total = packagesData.length;
-                document.getElementById('stats').textContent = `${withAttestations}/${total}`;
+                const withAttestations = packagesData.filter(pkg => pkg.attestationsUrl !== "").length;
+                const withoutAttestations = packagesData.filter(pkg => {
+                    const hasAttestations = pkg.attestationsUrl !== "";
+                    return !hasAttestations && isSupportedPublisher(pkg.repositoryUrl) && !isOutdated(pkg.lastUploaded);
+                }).length;
+                const unsupportedProvider = packagesData.filter(pkg => {
+                    const hasAttestations = pkg.attestationsUrl !== "";
+                    return !hasAttestations && !isSupportedPublisher(pkg.repositoryUrl);
+                }).length;
+                const outdated = packagesData.filter(pkg => {
+                    const hasAttestations = pkg.attestationsUrl !== "";
+                    return !hasAttestations && isSupportedPublisher(pkg.repositoryUrl) && isOutdated(pkg.lastUploaded);
+                }).length;
+
+                // Calculate percentages
+                const attestationsPercent = Math.round((withAttestations / total) * 100);
+                const withoutAttestationsPercent = Math.round((withoutAttestations / total) * 100);
+                const unsupportedProviderPercent = Math.round((unsupportedProvider / total) * 100);
+                const outdatedPercent = Math.round((outdated / total) * 100);
+
+                document.getElementById('stats').innerHTML = `${withAttestations} / ${total}`;
+                
+                // Update legend with percentages
+                document.querySelector('.section ul').innerHTML = `
+                    <li><span class="color-green">Green</span> packages (${attestationsPercent}%) with a 🔏 have attestations for their latest release</li>
+                    <li><span class="color-grey">Grey</span> packages (${outdatedPercent}%) with a ⏰ come from a supported CI/CD provider but were uploaded before attestations were available</li>
+                    <li><span class="color-yellow">Yellow</span> packages (${withoutAttestationsPercent}%) with a ➖ come from a supported CI/CD provider but have no attestations (yet!)</li>
+                    <li><span class="color-pink">Pink</span> packages (${unsupportedProviderPercent}%) with a 🚫 come from an unsupported CI/CD provider</li>
+                `;
 
                 renderPackages();
             } catch (error) {
@@ -250,15 +557,27 @@
             }
 
             container.innerHTML = filteredPackages.map(pkg => {
-                const hasAttestations = pkg.attestations_url !== "";
-                const className = hasAttestations ? 'package-with-attestations' : 'package-without-attestations';
-                const tooltip = hasAttestations ? 'This package provides attestations.' : 'This package does not provide attestations (yet!).';
+                const hasAttestations = pkg.attestationsUrl !== "";
+                const className = getPackageStateClasses(pkg);
+                
+                let tooltip;
+                if (hasAttestations) {
+                    tooltip = 'This package provides attestations.';
+                } else if (className.includes('unsupported-publisher')) {
+                    tooltip = 'This package does not provide attestations and is from an unsupported publisher.';
+                } else if (className.includes('outdated')) {
+                    tooltip = 'This package does not provide attestations and was last uploaded before attestations were available.';
+                } else {
+                    tooltip = 'This package does not provide attestations (yet!).';
+                }
 
+                const releaseDate = pkg.lastUploaded ? new Date(pkg.lastUploaded).toISOString().split('T')[0] : '';
+                
                 return `
                     <a href="https://npmjs.com/package/${pkg.package}" class="package-item ${className}" target="_blank" title="${tooltip}">
                         <div>
                             <div class="package-name">${pkg.package}</div>
-                            <div class="package-version">v${pkg.version}</div>
+                            <div class="package-version">v${pkg.version} ${releaseDate ? `released on ${releaseDate}` : ''}</div>
                         </div>
                     </a>
                 `;
@@ -281,6 +600,49 @@
         });
 
         loadData();
+
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        // Check for saved theme preference or default to 'light' mode
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme) {
+            body.setAttribute('data-theme', currentTheme);
+            if (currentTheme === 'dark') {
+                themeToggle.checked = true;
+            }
+        } else {
+            // Check system preference
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                body.setAttribute('data-theme', 'dark');
+                themeToggle.checked = true;
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        themeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+            if (!localStorage.getItem('theme')) {
+                if (e.matches) {
+                    body.setAttribute('data-theme', 'dark');
+                    themeToggle.checked = true;
+                } else {
+                    body.setAttribute('data-theme', 'light');
+                    themeToggle.checked = false;
+                }
+            }
+        });
     </script>
 </body>
 </html>

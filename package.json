@@ -1,7 +1,7 @@
 {
   "name": "npm-package-provenance-stats",
   "version": "1.0.0",
-  "description": "Track which top npm packages have attestations",
+  "description": "Track which of the top 500 most-downloaded npm packages have been uploaded with attestations",
   "author": "Jordan Duabe",
   "license": "MIT",
   "main": "fetch-attestations.js",

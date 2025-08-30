@@ -3,17 +3,43 @@ const fs = require('fs');
 
 async function fetchPackageInfo(packageName) {
   try {
-    const response = await fetch(`https://registry.npmjs.org/${packageName}/latest`);
+    const response = await fetch(`https://registry.npmjs.org/${packageName}`);
     if (!response.ok) {
       console.error(`Failed to fetch ${packageName}: ${response.status}`);
       return null;
     }
     const data = await response.json();
 
+    const version = data['dist-tags']?.latest;
+    if (!version) {
+      console.error(`No latest version found for ${packageName}`);
+      return null;
+    }
+
+    const versionData = data.versions?.[version];
+    if (!versionData) {
+      console.error(`Version data not found for ${packageName}@${version}`);
+      return null;
+    }
+
+    const lastUploaded = data.time?.[version] || "";
+    
+    // Handle repository field - can be either a string URL or an object with url property
+    let repositoryUrl = "";
+    if (data.repository) {
+      if (typeof data.repository === 'string') {
+        repositoryUrl = data.repository;
+      } else if (data.repository.url) {
+        repositoryUrl = data.repository.url;
+      }
+    }
+
     return {
       package: packageName,
-      version: data.version,
-      attestations_url: data.dist?.attestations?.url || ""
+      version: version,
+      attestationsUrl: versionData.dist?.attestations?.url || "",
+      lastUploaded,
+      repositoryUrl
     };
   } catch (error) {
     console.error(`Error fetching ${packageName}:`, error.message);
@@ -63,7 +89,7 @@ async function main() {
   fs.writeFileSync('data/attestations.json', JSON.stringify(dataWithTimestamp));
   console.log('Results saved to data/attestations.json');
 
-  const withAttestations = validResults.filter(pkg => pkg.attestations_url !== "").length;
+  const withAttestations = validResults.filter(pkg => pkg.attestationsUrl !== "").length;
   console.log(`Packages with attestations: ${withAttestations}/${validResults.length}`);
 }
 
