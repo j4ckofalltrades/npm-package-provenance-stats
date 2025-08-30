@@ -22,9 +22,6 @@ async function fetchPackageInfo(packageName) {
       return null;
     }
 
-    const lastUploaded = data.time?.[version] || "";
-    
-    // Handle repository field - can be either a string URL or an object with url property
     let repositoryUrl = "";
     if (data.repository) {
       if (typeof data.repository === 'string') {
@@ -38,8 +35,9 @@ async function fetchPackageInfo(packageName) {
       package: packageName,
       version: version,
       attestationsUrl: versionData.dist?.attestations?.url || "",
-      lastUploaded,
-      repositoryUrl
+      lastUploaded: data.time?.[version] || "",
+      repositoryUrl,
+      trustedPublisher: versionData._npmUser?.trustedPublisher?.id || "",
     };
   } catch (error) {
     console.error(`Error fetching ${packageName}:`, error.message);
