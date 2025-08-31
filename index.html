@@ -6,16 +6,14 @@
     <title>npm package provenance stats</title>
     <style>
         :root {
-            /* Light theme colors */
             --bg-primary: #f8f9fa;
             --bg-secondary: white;
             --text-primary: #333;
             --text-secondary: #6c757d;
             --text-link: #0366d6;
             --border-color: #e2e8f0;
-            --shadow-color: rgba(0,0,0,0.1);
-            
-            /* Package state colors */
+            --shadow-color: rgba(0, 0, 0, 0.1);
+
             --package-attestations-bg: #d4edda;
             --package-attestations-hover: #c3e6cb;
             --package-without-attestations-bg: #fff3cd;
@@ -24,8 +22,7 @@
             --package-unsupported-hover: #f5c6cb;
             --package-outdated-bg: #e9ecef;
             --package-outdated-hover: #dee2e6;
-            
-            /* Legend text colors */
+
             --color-green: #0f7b0f;
             --color-grey: #495057;
             --color-yellow: #cc8800;
@@ -33,16 +30,14 @@
         }
 
         [data-theme="dark"] {
-            /* Dark theme colors */
             --bg-primary: #1a1a1a;
             --bg-secondary: #2d3748;
             --text-primary: #e9ecef;
             --text-secondary: #a0aec0;
             --text-link: #4dabf7;
             --border-color: #4a5568;
-            --shadow-color: rgba(0,0,0,0.3);
-            
-            /* Package state colors for dark theme */
+            --shadow-color: rgba(0, 0, 0, 0.3);
+
             --package-attestations-bg: #2d5a2d;
             --package-attestations-hover: #3d6a3d;
             --package-without-attestations-bg: #5c4a1a;
@@ -51,8 +46,7 @@
             --package-unsupported-hover: #6c3d3d;
             --package-outdated-bg: #3a3a3a;
             --package-outdated-hover: #4a4a4a;
-            
-            /* Legend text colors for dark theme */
+
             --color-green: #4ade80;
             --color-grey: #9ca3af;
             --color-yellow: #fbbf24;
@@ -133,7 +127,7 @@
             background: white;
             transition: transform 0.3s ease;
             transform: translateX(0);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .theme-toggle-input:checked + .theme-toggle-slider::before {
@@ -182,7 +176,6 @@
             }
         }
 
-        /* Ensure all links maintain consistent color */
         a, a:visited, a:link {
             color: var(--text-link);
         }
@@ -271,6 +264,69 @@
             border-color: var(--text-link);
         }
 
+        .filter-container {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .filter-btn {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .filter-btn:hover {
+            background: var(--bg-primary);
+            border-color: var(--text-link);
+        }
+
+        .filter-btn.active {
+            background: var(--text-link);
+            color: white;
+            border-color: var(--text-link);
+        }
+
+        .filter-btn.active:hover {
+            background: var(--text-link);
+            opacity: 0.9;
+        }
+
+
+        @media (max-width: 768px) {
+            .filter-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .filter-buttons {
+                gap: 6px;
+            }
+
+            .filter-btn {
+                padding: 6px 10px;
+                font-size: 13px;
+            }
+        }
+
         .package-list {
             height: 550px;
             overflow-y: auto;
@@ -353,6 +409,29 @@
             color: var(--text-secondary);
         }
 
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--border-color);
+            border-radius: 50%;
+            border-top-color: var(--text-link);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
         .footer {
             text-align: center;
             padding: 20px;
@@ -367,100 +446,242 @@
 
 <body>
 <div class="container">
-        <div class="header">
-            <h1>npm package provenance stats</h1>
-            <div class="header-controls">
-                <label class="theme-toggle" for="theme-toggle" aria-label="Toggle dark mode">
-                    <input type="checkbox" id="theme-toggle" class="theme-toggle-input">
-                    <span class="theme-toggle-slider">
+    <div class="header">
+        <h1>npm package provenance stats</h1>
+        <div class="header-controls">
+            <label class="theme-toggle" for="theme-toggle" aria-label="Toggle dark mode">
+                <input type="checkbox" id="theme-toggle" class="theme-toggle-input">
+                <span class="theme-toggle-slider">
                         <span class="theme-toggle-icon theme-toggle-light">🌞</span>
                         <span class="theme-toggle-icon theme-toggle-dark">🌙</span>
                     </span>
-                </label>
-            </div>
-        </div>
-
-        <div class="left-column">
-            <div class="stats" id="stats">Loading...</div>
-            
-            <div class="section">
-                <h2>What is this list?</h2>
-                <p>This site shows the top 500 most-downloaded packages on <a href="https://npmjs.com" target="_blank" >npm</a> showing which have been uploaded with attestations.</p>
-                <ul>
-                    <li>Green packages with a 🔏 have attestations for their latest release</li>
-                    <li>Gray packages with a ⏰ comes from a supported CI/CD provider but were uploaded before attestations were available</li>
-                    <li>Yellow packages with a ➖ come from a supported CI/CD provider but have no attestations (yet!)</li>
-                    <li>Magenta packages with a 🚫 come from an unsupported CI/CD provider</li>
-                </ul>
-                <p>Additionally packages with a 📄 use Trusted Publishing instead of long-lived API tokens.</p>
-                <p>Refer to the npm docs for more details about <a href="https://docs.npmjs.com/trusted-publishers" target="_blank">Trusted Publishers</a> and <a href="https://docs.npmjs.com/generating-provenance-statements" target="_blank">generating provenance statements</a>.</p>
-            </div>
-        </div>
-
-        <div class="right-column">
-            <label for="searchBox">
-                <input type="text" id="searchBox" class="search-box" placeholder="Search packages...">
             </label>
-            
-            <div id="packageList" class="package-list">
-                <div class="loading">Loading package data...</div>
-            </div>
         </div>
     </div>
 
-    <footer class="footer">
-        <div id="lastUpdated">Loading...</div>
-    </footer>
+    <div class="left-column">
+        <div class="stats" id="stats">Loading...</div>
 
-    <script>
-        let packagesData = [];
-        let filteredPackages = [];
+        <div class="section">
+            <h2>What is this list?</h2>
+            <p>
+                This site shows the top 500 most-downloaded packages on
+                <a href="https://npmjs.com" target="_blank">npm</a>
+                showing which have been uploaded with attestations.
+            </p>
+            <ul>
+                <li>Green packages with a 🔏 have attestations for their latest release</li>
+                <li>Gray packages with a ⏰ comes from a supported CI/CD provider but were uploaded before attestations
+                    were available
+                </li>
+                <li>Yellow packages with a ➖ come from a supported CI/CD provider but have no attestations (yet!)</li>
+                <li>Magenta packages with a 🚫 come from an unsupported CI/CD provider</li>
+            </ul>
+            <p>Additionally packages with a 📄 use Trusted Publishing instead of long-lived API tokens.</p>
+            <p>Refer to the npm docs for more details about
+                <a href="https://docs.npmjs.com/trusted-publishers" target="_blank">Trusted Publishers</a> and
+                <a href="https://docs.npmjs.com/generating-provenance-statements" target="_blank">generating provenance
+                    statements</a>.
+            </p>
+        </div>
+    </div>
 
+    <div class="right-column">
+        <label for="searchBox">
+            <input type="text" id="searchBox" class="search-box" placeholder="Search packages...">
+        </label>
+
+        <div class="filter-container">
+            <div class="filter-buttons" role="group" aria-label="Package filters">
+                <button class="filter-btn" data-filter="with-attestations" aria-pressed="false"
+                        title="Packages with attestations for their latest release">
+                    🔏
+                </button>
+                <button class="filter-btn" data-filter="without-attestations" aria-pressed="false"
+                        title="Packages from a supported CI/CD provider that have no attestations (yet!)">
+                    ➖
+                </button>
+                <button class="filter-btn" data-filter="outdated" aria-pressed="false"
+                        title="Packages from a supported CI/CD provider that were uploaded before attestations were available">
+                    ⏰
+                </button>
+                <button class="filter-btn" data-filter="unsupported" aria-pressed="false"
+                        title="Packages from an unsupported CI/CD provider">
+                    🚫
+                </button>
+                <button class="filter-btn" data-filter="trusted-publisher" aria-pressed="false"
+                        title="Packages that use Trusted Publishing instead of long-lived API tokens">
+                    📄
+                </button>
+            </div>
+        </div>
+
+        <div id="packageList" class="package-list">
+            <div class="loading">
+                <div class="loading-text">
+                    <div class="loading-spinner"></div>
+                    Loading package data...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div id="lastUpdated">Loading...</div>
+</footer>
+
+<script>
+    const AppState = {
+        packagesData: [],
+        filteredPackages: [],
+        currentFilter: null,
+        searchDebounceTimer: null,
+        filterCache: new Map(),
+        packageCategoryCache: new Map(),
+        renderAnimationFrame: null
+    };
+
+    const Config = {
         // https://docs.npmjs.com/generating-provenance-statements
-        const supportedPublishers = [
+        supportedPublishers: [
             'github.com',
             'gitlab.com',
-        ];
-
+        ],
         // https://github.blog/security/supply-chain-security/introducing-npm-package-provenance/
-        const attestationsEnabledDate = new Date('2023-04-19');
+        attestationsEnabledDate: new Date('2023-04-19'),
+        debounceDelay: 300,
+        renderChunkSize: 50
+    };
 
-        function isSupportedPublisher(repositoryUrl) {
+    const Utils = {
+        isSupportedPublisher(repositoryUrl) {
             if (!repositoryUrl) return false;
-            return supportedPublishers.some(publisher => repositoryUrl.toLowerCase().includes(publisher.toLowerCase()));
-        }
+            return Config.supportedPublishers.some(publisher =>
+                repositoryUrl.toLowerCase().includes(publisher.toLowerCase()));
+        },
 
-        function isOutdated(lastUploadedDate) {
+        isOutdated(lastUploadedDate) {
             if (!lastUploadedDate) return false;
             const uploadDate = new Date(lastUploadedDate);
-            return uploadDate < attestationsEnabledDate;
-        }
+            return uploadDate < Config.attestationsEnabledDate;
+        },
 
-        function getPackageStateClasses(pkg) {
+        showLoadingState(message = 'Loading...') {
+            document.getElementById('packageList').innerHTML = `
+                <div class="loading">
+                    <div class="loading-text">
+                        <div class="loading-spinner"></div>
+                        ${message}
+                    </div>
+                </div>`;
+        }
+    };
+
+    const PackageAnalyzer = {
+        getPackageStateClasses(pkg) {
             const classes = [];
             const hasAttestations = pkg.attestationsUrl !== "";
-            
+
             if (hasAttestations) {
                 classes.push('package-with-attestations');
             } else {
                 classes.push('package-without-attestations');
-                
-                if (!isSupportedPublisher(pkg.repositoryUrl)) {
+
+                if (!Utils.isSupportedPublisher(pkg.repositoryUrl)) {
                     classes.push('unsupported-publisher');
-                } else if (isOutdated(pkg.lastUploaded)) {
+                } else if (Utils.isOutdated(pkg.lastUploaded)) {
                     classes.push('outdated');
                 }
             }
-            
-            return classes.join(' ');
-        }
 
-        async function loadData() {
+            return classes.join(' ');
+        },
+
+        getPackageCategory(pkg) {
+            const cacheKey = `${pkg.package}-${pkg.version}`;
+            if (AppState.packageCategoryCache.has(cacheKey)) {
+                return AppState.packageCategoryCache.get(cacheKey);
+            }
+
+            const hasAttestations = pkg.attestationsUrl !== "";
+            let category;
+
+            if (hasAttestations) {
+                category = 'with-attestations';
+            } else if (!Utils.isSupportedPublisher(pkg.repositoryUrl)) {
+                category = 'unsupported';
+            } else if (Utils.isOutdated(pkg.lastUploaded)) {
+                category = 'outdated';
+            } else {
+                category = 'without-attestations';
+            }
+
+            AppState.packageCategoryCache.set(cacheKey, category);
+            return category;
+        }
+    };
+
+    const PackageFilter = {
+        filterPackages(packages, filter) {
+            if (filter === null) {
+                return packages;
+            }
+
+            return packages.filter(pkg => {
+                const category = PackageAnalyzer.getPackageCategory(pkg);
+                if (filter === 'trusted-publisher') {
+                    return pkg.trustedPublisher && pkg.trustedPublisher.trim() !== '';
+                }
+                return category === filter;
+            });
+        },
+
+        applyCurrentFilter() {
+            const searchQuery = document.getElementById('searchBox').value.trim();
+            const cacheKey = `${searchQuery || 'empty'}-${AppState.currentFilter || 'none'}`;
+
+            if (AppState.filterCache.has(cacheKey)) {
+                AppState.filteredPackages = AppState.filterCache.get(cacheKey);
+                return;
+            }
+
+            let packages = [...AppState.packagesData];
+
+            if (searchQuery) {
+                const lowercaseQuery = searchQuery.toLowerCase();
+                packages = packages.filter(pkg =>
+                    pkg.package.toLowerCase().includes(lowercaseQuery)
+                );
+            }
+
+            AppState.filteredPackages = this.filterPackages(packages, AppState.currentFilter);
+            AppState.filterCache.set(cacheKey, [...AppState.filteredPackages]);
+        },
+
+        debouncedSearch() {
+            if (AppState.searchDebounceTimer) {
+                clearTimeout(AppState.searchDebounceTimer);
+            }
+            AppState.searchDebounceTimer = setTimeout(() => {
+                this.applyCurrentFilter();
+                Renderer.renderPackages();
+            }, Config.debounceDelay);
+        }
+    };
+
+    const DataLoader = {
+        async loadData() {
+            Utils.showLoadingState('Fetching package data...');
             try {
                 const response = await fetch('data/attestations.json');
                 const data = await response.json();
-                
-                packagesData = data.packages;
+
+                AppState.packagesData = data.packages;
+
+                AppState.filterCache.clear();
+                AppState.packageCategoryCache.clear();
+
                 const lastUpdated = new Date(data.lastUpdated).toLocaleDateString('en-US', {
                     weekday: 'long',
                     day: 'numeric',
@@ -475,162 +696,221 @@
                 });
                 document.getElementById('lastUpdated').innerHTML =
                     `<div class="footer-content">
-                        <p>Last updated ${lastUpdated}. (Updated daily.)</p>
-                        <p>Inspired by <a href="https://trailofbits.github.io/are-we-pep740-yet" target="_blank">Are we PEP 740 yet?</a>. Source on <a href="https://github.com/j4ckofalltrades/npm-package-provenance-stats" target="_blank">GitHub</a>.</p>
-                     </div>
-                     `;
-                
-                filteredPackages = [...packagesData];
+                            <p>Last updated ${lastUpdated}. (Updated daily.)</p>
+                            <p>Inspired by <a href="https://trailofbits.github.io/are-we-pep740-yet" target="_blank">Are we PEP 740 yet?</a>. Source on <a href="https://github.com/j4ckofalltrades/npm-package-provenance-stats" target="_blank">GitHub</a>.</p>
+                         </div>
+                         `;
 
-                // Calculate statistics
-                const total = packagesData.length;
-                const withAttestations = packagesData.filter(pkg => pkg.attestationsUrl !== "").length;
-                const withoutAttestations = packagesData.filter(pkg => {
-                    const hasAttestations = pkg.attestationsUrl !== "";
-                    return !hasAttestations && isSupportedPublisher(pkg.repositoryUrl) && !isOutdated(pkg.lastUploaded);
-                }).length;
-                const unsupportedProvider = packagesData.filter(pkg => {
-                    const hasAttestations = pkg.attestationsUrl !== "";
-                    return !hasAttestations && !isSupportedPublisher(pkg.repositoryUrl);
-                }).length;
-                const outdated = packagesData.filter(pkg => {
-                    const hasAttestations = pkg.attestationsUrl !== "";
-                    return !hasAttestations && isSupportedPublisher(pkg.repositoryUrl) && isOutdated(pkg.lastUploaded);
-                }).length;
+                AppState.filteredPackages = [...AppState.packagesData];
 
-                // Calculate percentages
-                const attestationsPercent = Math.round((withAttestations / total) * 100);
-                const withoutAttestationsPercent = Math.round((withoutAttestations / total) * 100);
-                const unsupportedProviderPercent = Math.round((unsupportedProvider / total) * 100);
-                const outdatedPercent = Math.round((outdated / total) * 100);
+                this.updateStats();
+                PackageFilter.applyCurrentFilter();
+                Renderer.renderPackages();
+            } catch (error) {
+                document.getElementById('packageList').innerHTML = `
+                    <div class="loading">
+                        <div class="loading-text">
+                            ❌ Error loading data
+                        </div>
+                    </div>`;
+                document.getElementById('lastUpdated').textContent = 'Error loading timestamp';
+                console.error('Error loading data:', error);
+            }
+        },
 
-                document.getElementById('stats').innerHTML = `${withAttestations} / ${total}`;
-                
-                // Update legend with percentages
-                document.querySelector('.section ul').innerHTML = `
+        updateStats() {
+            const total = AppState.packagesData.length;
+            const withAttestations = AppState.packagesData.filter(pkg => pkg.attestationsUrl !== "").length;
+            const withoutAttestations = AppState.packagesData.filter(pkg => {
+                const hasAttestations = pkg.attestationsUrl !== "";
+                return !hasAttestations && Utils.isSupportedPublisher(pkg.repositoryUrl) && !Utils.isOutdated(pkg.lastUploaded);
+            }).length;
+            const unsupportedProvider = AppState.packagesData.filter(pkg => {
+                const hasAttestations = pkg.attestationsUrl !== "";
+                return !hasAttestations && !Utils.isSupportedPublisher(pkg.repositoryUrl);
+            }).length;
+            const outdated = AppState.packagesData.filter(pkg => {
+                const hasAttestations = pkg.attestationsUrl !== "";
+                return !hasAttestations && Utils.isSupportedPublisher(pkg.repositoryUrl) && Utils.isOutdated(pkg.lastUploaded);
+            }).length;
+
+            const attestationsPercent = Math.round((withAttestations / total) * 100);
+            const withoutAttestationsPercent = Math.round((withoutAttestations / total) * 100);
+            const unsupportedProviderPercent = Math.round((unsupportedProvider / total) * 100);
+            const outdatedPercent = Math.round((outdated / total) * 100);
+
+            document.getElementById('stats').innerHTML = `${withAttestations} / ${total}`;
+
+            document.querySelector('.section ul').innerHTML = `
                     <li><span class="color-green">Green</span> packages (${attestationsPercent}%) with a 🔏 have attestations for their latest release</li>
                     <li><span class="color-grey">Grey</span> packages (${outdatedPercent}%) with a ⏰ come from a supported CI/CD provider but were uploaded before attestations were available</li>
                     <li><span class="color-yellow">Yellow</span> packages (${withoutAttestationsPercent}%) with a ➖ come from a supported CI/CD provider but have no attestations (yet!)</li>
                     <li><span class="color-pink">Pink</span> packages (${unsupportedProviderPercent}%) with a 🚫 come from an unsupported CI/CD provider</li>
                 `;
-
-                renderPackages();
-            } catch (error) {
-                document.getElementById('packageList').innerHTML = '<div class="loading">Error loading data</div>';
-                document.getElementById('lastUpdated').textContent = 'Error loading timestamp';
-                console.error('Error loading data:', error);
-            }
         }
+    };
 
-        function renderPackages() {
+    const Renderer = {
+        createPackageElement(pkg) {
+            const hasAttestations = pkg.attestationsUrl !== "";
+            const className = PackageAnalyzer.getPackageStateClasses(pkg);
+
+            let tooltip;
+            if (hasAttestations) {
+                tooltip = 'This package provides attestations.';
+            } else if (className.includes('unsupported-publisher')) {
+                tooltip = 'This package does not provide attestations and is from an unsupported publisher.';
+            } else if (className.includes('outdated')) {
+                tooltip = 'This package does not provide attestations and was last uploaded before attestations were available.';
+            } else {
+                tooltip = 'This package does not provide attestations (yet!).';
+            }
+
+            const releaseDate = pkg.lastUploaded ? new Date(pkg.lastUploaded).toISOString().split('T')[0] : '';
+
+            let statusIcon;
+            if (hasAttestations) {
+                statusIcon = '🔏';
+            } else if (className.includes('unsupported-publisher')) {
+                statusIcon = '🚫';
+            } else if (className.includes('outdated')) {
+                statusIcon = '⏰';
+            } else {
+                statusIcon = '➖';
+            }
+
+            const trustedPublisherIcon = pkg.trustedPublisher && pkg.trustedPublisher.trim() !== '' ? '📄' : '';
+            const icons = statusIcon + trustedPublisherIcon;
+
+            const element = document.createElement('a');
+            element.href = `https://npmjs.com/package/${pkg.package}`;
+            element.className = `package-item ${className}`;
+            element.target = '_blank';
+            element.title = tooltip;
+
+            element.innerHTML = `
+                <div>
+                    <div class="package-name">${pkg.package}<span class="package-icons">${icons}</span></div>
+                    <div class="package-version">v${pkg.version} ${releaseDate ? `released on ${releaseDate}` : ''}</div>
+                </div>
+            `;
+
+            return element;
+        },
+
+        renderPackages() {
             const container = document.getElementById('packageList');
-            
-            if (filteredPackages.length === 0) {
+
+            if (AppState.filteredPackages.length === 0) {
                 container.innerHTML = '<div class="loading">No packages found</div>';
                 return;
             }
 
-            container.innerHTML = filteredPackages.map(pkg => {
-                const hasAttestations = pkg.attestationsUrl !== "";
-                const className = getPackageStateClasses(pkg);
-                
-                let tooltip;
-                if (hasAttestations) {
-                    tooltip = 'This package provides attestations.';
-                } else if (className.includes('unsupported-publisher')) {
-                    tooltip = 'This package does not provide attestations and is from an unsupported publisher.';
-                } else if (className.includes('outdated')) {
-                    tooltip = 'This package does not provide attestations and was last uploaded before attestations were available.';
-                } else {
-                    tooltip = 'This package does not provide attestations (yet!).';
-                }
-
-                const releaseDate = pkg.lastUploaded ? new Date(pkg.lastUploaded).toISOString().split('T')[0] : '';
-                
-                let statusIcon;
-                if (hasAttestations) {
-                    statusIcon = '🔏';
-                } else if (className.includes('unsupported-publisher')) {
-                    statusIcon = '🚫';
-                } else if (className.includes('outdated')) {
-                    statusIcon = '⏰';
-                } else {
-                    statusIcon = '➖';
-                }
-                
-                const trustedPublisherIcon = pkg.trustedPublisher && pkg.trustedPublisher.trim() !== '' ? '📄' : '';
-                const icons = statusIcon + trustedPublisherIcon;
-                
-                return `
-                    <a href="https://npmjs.com/package/${pkg.package}" class="package-item ${className}" target="_blank" title="${tooltip}">
-                        <div>
-                            <div class="package-name">${pkg.package}<span class="package-icons">${icons}</span></div>
-                            <div class="package-version">v${pkg.version} ${releaseDate ? `released on ${releaseDate}` : ''}</div>
-                        </div>
-                    </a>
-                `;
-            }).join('');
-        }
-
-        document.getElementById('searchBox').addEventListener('input', (e) => {
-            const query = e.target.value
-
-            if (!query.trim()) {
-                filteredPackages = [...packagesData];
-            } else {
-                const lowercaseQuery = query.toLowerCase();
-                filteredPackages = packagesData.filter(pkg =>
-                    pkg.package.toLowerCase().includes(lowercaseQuery)
-                );
+            if (AppState.renderAnimationFrame) {
+                cancelAnimationFrame(AppState.renderAnimationFrame);
             }
 
-            renderPackages();
+            container.innerHTML = '';
+
+            let currentIndex = 0;
+
+            const renderChunk = () => {
+                const fragment = document.createDocumentFragment();
+                const endIndex = Math.min(currentIndex + Config.renderChunkSize, AppState.filteredPackages.length);
+
+                for (let i = currentIndex; i < endIndex; i++) {
+                    fragment.appendChild(this.createPackageElement(AppState.filteredPackages[i]));
+                }
+
+                container.appendChild(fragment);
+                currentIndex = endIndex;
+
+                if (currentIndex < AppState.filteredPackages.length) {
+                    AppState.renderAnimationFrame = requestAnimationFrame(renderChunk);
+                } else {
+                    AppState.renderAnimationFrame = null;
+                }
+            };
+
+            AppState.renderAnimationFrame = requestAnimationFrame(renderChunk);
+        }
+    };
+
+    document.getElementById('searchBox').addEventListener('input', () => PackageFilter.debouncedSearch());
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        filterButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+
+                const clickedButton = e.target.closest('.filter-btn');
+                if (!clickedButton) return;
+
+                const clickedFilter = clickedButton.getAttribute('data-filter');
+                const isCurrentlyActive = clickedButton.classList.contains('active');
+
+                filterButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.setAttribute('aria-pressed', 'false');
+                });
+
+                if (isCurrentlyActive) {
+                    AppState.currentFilter = null;
+                } else {
+                    AppState.currentFilter = clickedFilter;
+                    clickedButton.classList.add('active');
+                    clickedButton.setAttribute('aria-pressed', 'true');
+                }
+
+                PackageFilter.applyCurrentFilter();
+                Renderer.renderPackages();
+            });
         });
+    });
 
-        loadData();
+    const themeToggle = document.getElementById('theme-toggle');
+    const body = document.body;
 
-        const themeToggle = document.getElementById('theme-toggle');
-        const body = document.body;
-
-        // Check for saved theme preference or default to 'light' mode
-        const currentTheme = localStorage.getItem('theme');
-        if (currentTheme) {
-            body.setAttribute('data-theme', currentTheme);
-            if (currentTheme === 'dark') {
-                themeToggle.checked = true;
-            }
-        } else {
-            // Check system preference
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                body.setAttribute('data-theme', 'dark');
-                themeToggle.checked = true;
-                localStorage.setItem('theme', 'dark');
-            } else {
-                localStorage.setItem('theme', 'light');
-            }
+    const currentTheme = localStorage.getItem('theme');
+    if (currentTheme) {
+        body.setAttribute('data-theme', currentTheme);
+        if (currentTheme === 'dark') {
+            themeToggle.checked = true;
         }
+    } else {
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            body.setAttribute('data-theme', 'dark');
+            themeToggle.checked = true;
+            localStorage.setItem('theme', 'dark');
+        } else {
+            localStorage.setItem('theme', 'light');
+        }
+    }
 
-        themeToggle.addEventListener('change', function() {
-            if (this.checked) {
+    themeToggle.addEventListener('change', function () {
+        if (this.checked) {
+            body.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            body.setAttribute('data-theme', 'light');
+            localStorage.setItem('theme', 'light');
+        }
+    });
+
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+        if (!localStorage.getItem('theme')) {
+            if (e.matches) {
                 body.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
+                themeToggle.checked = true;
             } else {
                 body.setAttribute('data-theme', 'light');
-                localStorage.setItem('theme', 'light');
+                themeToggle.checked = false;
             }
-        });
+        }
+    });
 
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
-            if (!localStorage.getItem('theme')) {
-                if (e.matches) {
-                    body.setAttribute('data-theme', 'dark');
-                    themeToggle.checked = true;
-                } else {
-                    body.setAttribute('data-theme', 'light');
-                    themeToggle.checked = false;
-                }
-            }
-        });
-    </script>
+    DataLoader.loadData();
+</script>
 </body>
 </html>
