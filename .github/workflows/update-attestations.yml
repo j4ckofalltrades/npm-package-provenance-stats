@@ -27,15 +27,12 @@ jobs:
         node-version: '22'
         cache: 'npm'
 
-    - name: Update dependencies
-      run: npm update --save
-        
     - name: Install dependencies
-      run: npm install
-      
+      run: npm install download-counts@latest
+
     - name: Fetch attestations data
-      run: npm run fetch
-      
+      run: node fetch-attestations.js
+
     - name: Commit and push changes
       run: |
         git config --local user.name "Attestation Update Bot"
