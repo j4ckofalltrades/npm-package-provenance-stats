@@ -1,9 +1,22 @@
 const downloadCounts = require('download-counts');
 const fs = require('fs');
 
+const DEPRECATED_PACKAGES = [
+    'mimic-fn',
+    'pkg-dir',
+    'path-is-absolute',
+    'inflight',
+    'find-cache-dir'
+]
+
 async function fetchPackageInfoWithRetry(packageName, maxRetries = 3) {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
+            if (DEPRECATED_PACKAGES.includes(packageName)) {
+                console.log(`Skipping deprecated package: ${packageName}`);
+                return {status: 'deprecated', package: packageName};
+            }
+
             const response = await fetch(`https://registry.npmjs.org/${packageName}`);
             if (!response.ok) {
                 if (response.status >= 500 && attempt < maxRetries) {
@@ -72,7 +85,8 @@ async function main() {
     const allPackageNames = Object.entries(downloadCounts)
         .sort(([_, cnt1], [__, cnt2]) => cnt2 - cnt1)
         .slice(0, 1000)
-        .map(([name, _]) => name);
+        .map(([name, _]) => name)
+        .filter(name => !DEPRECATED_PACKAGES.includes(name));
 
     console.log(`Fetching package details until we have ${targetPackages} valid packages...`);
 
