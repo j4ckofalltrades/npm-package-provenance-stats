@@ -147,8 +147,8 @@ async function main() {
         packages: validResults
     };
 
-    fs.writeFileSync('data/attestations.json', JSON.stringify(dataWithTimestamp));
-    console.log('Results saved to data/attestations.json');
+    fs.writeFileSync('results.json', JSON.stringify(dataWithTimestamp));
+    console.log('Results saved to results.json');
 
     const withAttestations = validResults.filter(pkg => pkg.attestationsUrl !== "").length;
     console.log(`Packages with attestations: ${withAttestations}/${validResults.length}`);

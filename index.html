@@ -674,7 +674,7 @@
         async loadData() {
             Utils.showLoadingState('Fetching package data...');
             try {
-                const response = await fetch('data/attestations.json');
+                const response = await fetch('results.json');
                 const data = await response.json();
 
                 AppState.packagesData = data.packages;

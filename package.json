@@ -5,9 +5,6 @@
   "author": "Jordan Duabe",
   "license": "MIT",
   "main": "fetch-attestations.js",
-  "scripts": {
-    "fetch": "node fetch-attestations.js"
-  },
   "dependencies": {
     "download-counts": "^2.20250815.0"
   },
