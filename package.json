@@ -6,7 +6,7 @@
   "license": "MIT",
   "main": "fetch-attestations.js",
   "dependencies": {
-    "download-counts": "^2.20250901.0"
+    "download-counts": "^2.20250915.0"
   },
   "keywords": [
     "attestations",
