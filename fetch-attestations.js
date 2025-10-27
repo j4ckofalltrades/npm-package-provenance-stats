@@ -9,6 +9,10 @@ const DEPRECATED_PACKAGES = [
     'find-cache-dir'
 ]
 
+const REPOSITORY_MAPPING = {
+    '@dataform/core': 'https://github.com/dataform-co/dataform'
+}
+
 async function fetchPackageInfoWithRetry(packageName, maxRetries = 3) {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
@@ -54,6 +58,10 @@ async function fetchPackageInfoWithRetry(packageName, maxRetries = 3) {
                 } else if (data.repository.url) {
                     repositoryUrl = data.repository.url;
                 }
+            }
+
+            if (!repositoryUrl && REPOSITORY_MAPPING[packageName]) {
+                repositoryUrl = REPOSITORY_MAPPING[packageName];
             }
 
             return {
